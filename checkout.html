@@ -19,12 +19,10 @@
   </nav>
 
   <main class="container">
-    <div class="checkout-wrapper">
-      <h2>Complete Your Purchase</h2>
-
+    <div class="checkout-grid">
+      <!-- Product & Duration Box -->
       <div class="checkout-card">
-        <h3>1. Select Product & Duration</h3>
-        
+        <h3>1. Select Duration</h3>
         <div class="form-group">
           <label>Product</label>
           <input type="text" id="productName" value="Drip Client Non-Root Panel" readonly class="input-readonly">
@@ -32,50 +30,51 @@
         </div>
 
         <div class="form-group">
-          <label>Select Duration</label>
-          <select id="durationSelect" class="stx-input">
-            <option value="1_day" data-price="150">1 Day (৳150)</option>
-            <option value="7_days" data-price="600" selected>7 Days (৳600)</option>
-            <option value="30_days" data-price="1800">30 Days (৳1800)</option>
+          <label>Choose Duration</label>
+          <select id="packageSelect" class="stx-input">
+            <option value="pkg_1d" data-days="1" data-price="150">1 Day - ৳150</option>
+            <option value="pkg_7d" data-days="7" data-price="600" selected>7 Days - ৳600</option>
+            <option value="pkg_30d" data-days="30" data-price="1800">30 Days - ৳1800</option>
           </select>
         </div>
 
         <div class="form-group">
-          <label>Coupon Code (Optional)</label>
-          <div class="coupon-field">
+          <label>Coupon Code</label>
+          <div class="coupon-row">
             <input type="text" id="couponCode" placeholder="Enter coupon" class="stx-input">
-            <button type="button" id="btnApplyCoupon" class="btn-secondary">Apply</button>
+            <button type="button" id="btnCoupon" class="btn-secondary">Apply</button>
           </div>
         </div>
 
-        <div class="price-summary">
-          <span>Total Payable:</span>
-          <span id="displayAmount" class="price-highlight">৳600</span>
+        <div class="total-box">
+          <span>Payable Total:</span>
+          <span id="totalDisplay" class="highlight-price">৳600</span>
         </div>
       </div>
 
-      <div class="checkout-card bkash-card">
+      <!-- bKash Send Money Box -->
+      <div class="checkout-card bkash-theme">
         <h3>2. bKash Send Money</h3>
-        <p>Send the exact amount using <strong>Send Money</strong> to the bKash number below:</p>
+        <p>Send Money to the following official bKash personal number:</p>
         
-        <div class="bkash-number-box">
+        <div class="bkash-badge">
           <span>bKash Number:</span>
-          <strong id="bkashNumber">01860909272</strong>
-          <button type="button" class="btn-copy" onclick="navigator.clipboard.writeText('01860909272'); alert('bKash Number Copied!');">COPY</button>
+          <strong id="bkashNum">01860909272</strong>
+          <button type="button" class="btn-sm" onclick="navigator.clipboard.writeText('01860909272'); alert('Copied 01860909272');">COPY</button>
         </div>
 
-        <form id="checkoutForm">
+        <form id="orderForm">
           <div class="form-group">
-            <label>Your Sender bKash Number</label>
-            <input type="tel" id="senderNumber" placeholder="017XXXXXXXX" required class="stx-input">
+            <label>Sender bKash Number</label>
+            <input type="tel" id="senderNumber" placeholder="01XXXXXXXXX" required class="stx-input">
           </div>
 
           <div class="form-group">
-            <label>Transaction ID (TrxID)</label>
-            <input type="text" id="trxId" placeholder="e.g. BLA892348" required class="stx-input text-uppercase">
+            <label>bKash Transaction ID (TrxID)</label>
+            <input type="text" id="trxId" placeholder="e.g. CB58AK91" required class="stx-input uppercase">
           </div>
 
-          <button type="submit" id="btnSubmitOrder" class="btn-primary-large">Submit Order & Receive Key</button>
+          <button type="submit" id="btnPlaceOrder" class="btn-bkash">Submit & Get Key Automatically</button>
         </form>
       </div>
     </div>
