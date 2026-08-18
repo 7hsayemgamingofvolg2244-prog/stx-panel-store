@@ -1,32 +1,56 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    
+
     function isAuthenticated() {
       return request.auth != null;
     }
-    
+
     function isOwner(userId) {
       return isAuthenticated() && request.auth.uid == userId;
     }
 
-    // Products: Anyone can read
-    match /products/{productId} {
-      allow read: if true;
-      allow write: if false; 
-    }
+    // Public readable catalogs
+    match /products/{id} { allow read: if true; allow write: if false; }
+    match /categories/{id} { allow read: if true; allow write: if false; }
+    match /packages/{id} { allow read: if true; allow write: if false; }
+    match /coupons/{id} { allow read: if isAuthenticated(); allow write: if false; }
+    match /settings/{id} { allow read: if true; allow write: if false; }
 
-    // Orders: Users can read and create their own orders
+    // Customer Orders
     match /orders/{orderId} {
       allow read: if isAuthenticated() && isOwner(resource.data.userId);
       allow create: if isAuthenticated() && isOwner(request.resource.data.userId);
-      allow update, delete: if false; 
+      allow update, delete: if false; // Only server updates status
     }
 
-    // Deliveries (My Key): Only accessible by the owner. Cannot be written from frontend.
-    match /deliveries/{deliveryId} {
+    // Customer Payments (bKash Submissions)
+    match /payments/{paymentId} {
       allow read: if isAuthenticated() && isOwner(resource.data.userId);
-      allow write: if false; // Only backend service account writes credentials
+      allow create: if isAuthenticated() && isOwner(request.resource.data.userId);
+      allow update, delete: if false;
+    }
+
+    // Customer Keys (My Key Display) - STRICT READ ONLY FOR OWNER
+    match /keys/{keyId} {
+      allow read: if isAuthenticated() && isOwner(resource.data.userId);
+      allow write: if false; // Backend Admin SDK creates and updates keys
+    }
+
+    // Wallets & Transactions
+    match /wallets/{userId} {
+      allow read: if isAuthenticated() && isOwner(userId);
+      allow write: if false;
+    }
+    match /transactions/{trxId} {
+      allow read: if isAuthenticated() && isOwner(resource.data.userId);
+      allow write: if false;
+    }
+
+    // Support Tickets
+    match /support/{ticketId} {
+      allow read, create: if isAuthenticated() && isOwner(request.resource.data.userId);
+      allow update, delete: if false;
     }
   }
 }
