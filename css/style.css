@@ -1,0 +1,192 @@
+/* Theme & Layout */
+body.stx-body {
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  background-color: #0f111a;
+  color: #e6edf3;
+}
+
+.container {
+  max-width: 1100px;
+  margin: 40px auto;
+  padding: 0 20px;
+}
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 32px;
+  background-color: #161b26;
+  border-bottom: 1px solid #232a3b;
+}
+
+.nav-brand {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #58a6ff;
+}
+
+.nav-links a {
+  color: #8b949e;
+  text-decoration: none;
+  margin-left: 20px;
+  font-weight: 500;
+}
+
+.nav-links a.active, .nav-links a:hover {
+  color: #58a6ff;
+}
+
+/* Checkout Page */
+.checkout-wrapper {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+@media (max-width: 768px) {
+  .checkout-wrapper { grid-template-columns: 1fr; }
+}
+
+.checkout-card {
+  background: #161b26;
+  border: 1px solid #232a3b;
+  border-radius: 10px;
+  padding: 24px;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.85rem;
+  color: #8b949e;
+  margin-bottom: 6px;
+}
+
+.stx-input, .input-readonly {
+  width: 100%;
+  padding: 10px 14px;
+  background: #0d1117;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  color: #e6edf3;
+  box-sizing: border-box;
+}
+
+.bkash-number-box {
+  background: #211c27;
+  border: 1px dashed #e2136e;
+  padding: 14px;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.bkash-number-box strong {
+  color: #e2136e;
+  font-size: 1.2rem;
+}
+
+.btn-primary-large {
+  width: 100%;
+  padding: 14px;
+  background: #e2136e;
+  border: none;
+  border-radius: 6px;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* My Key Delivery Cards */
+.keys-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 24px;
+}
+
+.key-card {
+  background: #161b26;
+  border: 1px solid #232a3b;
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.key-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #232a3b;
+  padding-bottom: 12px;
+}
+
+.badge {
+  font-size: 0.75rem;
+  padding: 4px 10px;
+  border-radius: 14px;
+  font-weight: bold;
+}
+
+.status-active { background: #238636; color: #fff; }
+.status-expired { background: #da3633; color: #fff; }
+
+.key-body {
+  margin: 16px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.item-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #0d1117;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+}
+
+.item-row .label { color: #8b949e; }
+.item-row .val.mono { font-family: monospace; color: #58a6ff; }
+
+.action-field {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-sm, .btn-copy {
+  background: #21262d;
+  color: #c9d1d9;
+  border: 1px solid #30363d;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.75rem;
+}
+
+.btn-sm:hover, .btn-copy:hover {
+  background: #30363d;
+}
+
+.key-footer {
+  border-top: 1px solid #232a3b;
+  padding-top: 12px;
+  font-size: 0.85rem;
+  color: #8b949e;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.text-active { color: #3fb950; font-weight: bold; }
+.text-expired { color: #f85149; font-weight: bold; }
