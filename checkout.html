@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Checkout | STX STORE</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="stx-body">
+
+  <nav class="navbar">
+    <div class="nav-brand">STX STORE</div>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="products.html">Panels</a>
+      <a href="my-orders.html">My Orders</a>
+      <a href="my-key.html">My Key</a>
+    </div>
+  </nav>
+
+  <main class="container">
+    <div class="checkout-wrapper">
+      <h2>Complete Your Purchase</h2>
+
+      <div class="checkout-card">
+        <h3>1. Select Product & Duration</h3>
+        
+        <div class="form-group">
+          <label>Product</label>
+          <input type="text" id="productName" value="Drip Client Non-Root Panel" readonly class="input-readonly">
+          <input type="hidden" id="productId" value="drip-client-non-root">
+        </div>
+
+        <div class="form-group">
+          <label>Select Duration</label>
+          <select id="durationSelect" class="stx-input">
+            <option value="1_day" data-price="150">1 Day (৳150)</option>
+            <option value="7_days" data-price="600" selected>7 Days (৳600)</option>
+            <option value="30_days" data-price="1800">30 Days (৳1800)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Coupon Code (Optional)</label>
+          <div class="coupon-field">
+            <input type="text" id="couponCode" placeholder="Enter coupon" class="stx-input">
+            <button type="button" id="btnApplyCoupon" class="btn-secondary">Apply</button>
+          </div>
+        </div>
+
+        <div class="price-summary">
+          <span>Total Payable:</span>
+          <span id="displayAmount" class="price-highlight">৳600</span>
+        </div>
+      </div>
+
+      <div class="checkout-card bkash-card">
+        <h3>2. bKash Send Money</h3>
+        <p>Send the exact amount using <strong>Send Money</strong> to the bKash number below:</p>
+        
+        <div class="bkash-number-box">
+          <span>bKash Number:</span>
+          <strong id="bkashNumber">01860909272</strong>
+          <button type="button" class="btn-copy" onclick="navigator.clipboard.writeText('01860909272'); alert('bKash Number Copied!');">COPY</button>
+        </div>
+
+        <form id="checkoutForm">
+          <div class="form-group">
+            <label>Your Sender bKash Number</label>
+            <input type="tel" id="senderNumber" placeholder="017XXXXXXXX" required class="stx-input">
+          </div>
+
+          <div class="form-group">
+            <label>Transaction ID (TrxID)</label>
+            <input type="text" id="trxId" placeholder="e.g. BLA892348" required class="stx-input text-uppercase">
+          </div>
+
+          <button type="submit" id="btnSubmitOrder" class="btn-primary-large">Submit Order & Receive Key</button>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <script type="module" src="js/checkout.js"></script>
+</body>
+</html>
