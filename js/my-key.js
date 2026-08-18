@@ -3,48 +3,44 @@ import { db, auth } from './firebase-config.js';
 import { collection, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-let timerInterval = null;
+let ticker = null;
 
 onAuthStateChanged(auth, (user) => {
   if (user) {
-    loadUserKeys(user.uid);
+    loadKeysFromFirestore(user.uid);
   } else {
     window.location.href = "login.html";
   }
 });
 
-function loadUserKeys(userId) {
-  const deliveriesQuery = query(
-    collection(db, "deliveries"),
-    where("userId", "==", userId)
-  );
+function loadKeysFromFirestore(userId) {
+  // Query only records belonging to this user in the 'keys' collection
+  const q = query(collection(db, "keys"), where("userId", "==", userId));
 
-  onSnapshot(deliveriesQuery, (snapshot) => {
-    const container = document.getElementById("keysGrid");
-    container.innerHTML = "";
+  onSnapshot(q, (snapshot) => {
+    const grid = document.getElementById("keysGrid");
+    grid.innerHTML = "";
 
     if (snapshot.empty) {
-      container.innerHTML = `
-        <div class="empty-box">
-          <h3>No Keys Delivered Yet</h3>
-          <p>When you complete a purchase, your panel keys and passwords will automatically appear here.</p>
-          <a href="products.html" class="btn-primary">Browse Panels</a>
+      grid.innerHTML = `
+        <div class="empty-keys">
+          <h3>No Keys Available</h3>
+          <p>Your purchased panel credentials will appear here automatically once processed.</p>
         </div>
       `;
       return;
     }
 
-    const deliveryList = [];
-    snapshot.forEach((doc) => deliveryList.push(doc.data()));
+    const keyList = [];
+    snapshot.forEach((doc) => keyList.push(doc.data()));
 
-    renderKeys(deliveryList);
-    startExpiryTracker(deliveryList);
+    renderKeysUI(keyList);
+    startLiveCountdown(keyList);
   });
 }
 
-function calculateExpiryCountdown(expiryIso) {
-  const diff = new Date(expiryIso).getTime() - new Date().getTime();
-  
+function calculateTimeRemaining(expiryDateIso) {
+  const diff = new Date(expiryDateIso).getTime() - new Date().getTime();
   if (diff <= 0) {
     return { isExpired: true, text: "EXPIRED" };
   }
@@ -53,122 +49,119 @@ function calculateExpiryCountdown(expiryIso) {
   const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
   const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
 
-  let timeString = "";
-  if (days > 0) timeString += `${days} Days `;
-  timeString += `${hours} Hours ${minutes} Mins`;
+  let formatted = "";
+  if (days > 0) formatted += `${days} Days `;
+  formatted += `${hours} Hours ${minutes} Mins`;
 
-  return { isExpired: false, text: timeString };
+  return { isExpired: false, text: formatted };
 }
 
-function formatDate(isoString) {
-  return new Date(isoString).toLocaleDateString('en-GB', {
+function formatDate(iso) {
+  return new Date(iso).toLocaleDateString('en-GB', {
     day: 'numeric',
     month: 'long',
     year: 'numeric'
   });
 }
 
-function renderKeys(deliveries) {
-  const container = document.getElementById("keysGrid");
-  container.innerHTML = "";
+function renderKeysUI(items) {
+  const grid = document.getElementById("keysGrid");
+  grid.innerHTML = "";
 
-  deliveries.forEach((item) => {
-    const expiry = calculateExpiryCountdown(item.expiryDate);
-    const statusText = expiry.isExpired ? 'EXPIRED' : 'ACTIVE';
-    const statusClass = expiry.isExpired ? 'status-expired' : 'status-active';
+  items.forEach((item) => {
+    const timeObj = calculateTimeRemaining(item.expiryDate);
+    const status = timeObj.isExpired ? "EXPIRED" : "ACTIVE";
+    const statusClass = timeObj.isExpired ? "badge-expired" : "badge-active";
 
     const card = document.createElement("div");
     card.className = "key-card";
 
     card.innerHTML = `
-      <div class="key-card-header">
-        <h3 class="product-title">${item.productName.toUpperCase()}</h3>
-        <span class="badge ${statusClass}">${statusText}</span>
+      <div class="card-header">
+        <h3 class="panel-name">${item.productName.toUpperCase()}</h3>
+        <span class="status-badge ${statusClass}">${status}</span>
       </div>
 
-      <div class="key-body">
-        <div class="item-row">
-          <span class="label">Duration:</span>
-          <span class="val">${item.durationDays} Days</span>
+      <div class="credentials-box">
+        <div class="cred-row">
+          <span class="cred-label">Duration:</span>
+          <span class="cred-val">${item.durationDays} Days</span>
         </div>
 
-        <div class="item-row">
-          <span class="label">Panel URL:</span>
-          <div class="action-field">
-            <span class="val mono">${item.credentials.panelUrl}</span>
-            <button class="btn-sm" onclick="copyText('${item.credentials.panelUrl}')">COPY</button>
+        <div class="cred-row">
+          <span class="cred-label">Panel URL:</span>
+          <div class="action-wrap">
+            <span class="cred-val mono">${item.credentials.panelUrl}</span>
+            <button class="btn-copy" onclick="copyValue('${item.credentials.panelUrl}')">COPY</button>
           </div>
         </div>
 
-        <div class="item-row">
-          <span class="label">Username:</span>
-          <div class="action-field">
-            <span class="val mono">${item.credentials.username}</span>
-            <button class="btn-sm" onclick="copyText('${item.credentials.username}')">COPY</button>
+        <div class="cred-row">
+          <span class="cred-label">Username:</span>
+          <div class="action-wrap">
+            <span class="cred-val mono">${item.credentials.username}</span>
+            <button class="btn-copy" onclick="copyValue('${item.credentials.username}')">COPY</button>
           </div>
         </div>
 
-        <div class="item-row">
-          <span class="label">Password:</span>
-          <div class="action-field">
-            <span class="val mono" id="pwd-${item.deliveryId}">••••••••</span>
-            <button class="btn-sm" onclick="togglePassword('${item.deliveryId}', '${item.credentials.password}')">SHOW PASSWORD</button>
-            <button class="btn-sm" onclick="copyText('${item.credentials.password}')">COPY</button>
+        <div class="cred-row">
+          <span class="cred-label">Password:</span>
+          <div class="action-wrap">
+            <span class="cred-val mono" id="pwd-${item.keyId}">••••••••</span>
+            <button class="btn-reveal" onclick="togglePasswordVisibility('${item.keyId}', '${item.credentials.password}')">SHOW PASSWORD</button>
+            <button class="btn-copy" onclick="copyValue('${item.credentials.password}')">COPY</button>
           </div>
         </div>
 
-        <div class="item-row">
-          <span class="label">License/Key:</span>
-          <div class="action-field">
-            <span class="val mono">${item.credentials.licenseKey}</span>
-            <button class="btn-sm" onclick="copyText('${item.credentials.licenseKey}')">COPY</button>
+        <div class="cred-row">
+          <span class="cred-label">License/Key:</span>
+          <div class="action-wrap">
+            <span class="cred-val mono">${item.credentials.licenseKey}</span>
+            <button class="btn-copy" onclick="copyValue('${item.credentials.licenseKey}')">COPY</button>
           </div>
         </div>
       </div>
 
-      <div class="key-footer">
+      <div class="card-footer">
         <div><strong>Purchase Date:</strong> ${formatDate(item.purchaseDate)}</div>
         <div><strong>Expiry Date:</strong> ${formatDate(item.expiryDate)}</div>
-        <div class="remaining-row">
+        <div class="countdown-row">
           <strong>Remaining:</strong>
-          <span id="countdown-${item.deliveryId}" class="${expiry.isExpired ? 'text-expired' : 'text-active'}">
-            ${expiry.text}
+          <span id="time-${item.keyId}" class="${timeObj.isExpired ? 'txt-expired' : 'txt-active'}">
+            ${timeObj.text}
           </span>
         </div>
       </div>
     `;
 
-    container.appendChild(card);
+    grid.appendChild(card);
   });
 }
 
-function startExpiryTracker(deliveries) {
-  if (timerInterval) clearInterval(timerInterval);
-
-  timerInterval = setInterval(() => {
-    deliveries.forEach((item) => {
-      const countdownEl = document.getElementById(`countdown-${item.deliveryId}`);
-      if (countdownEl) {
-        const expiry = calculateExpiryCountdown(item.expiryDate);
-        countdownEl.innerText = expiry.text;
-        countdownEl.className = expiry.isExpired ? 'text-expired' : 'text-active';
+function startLiveCountdown(items) {
+  if (ticker) clearInterval(ticker);
+  ticker = setInterval(() => {
+    items.forEach((item) => {
+      const el = document.getElementById(`time-${item.keyId}`);
+      if (el) {
+        const timeObj = calculateTimeRemaining(item.expiryDate);
+        el.innerText = timeObj.text;
+        el.className = timeObj.isExpired ? 'txt-expired' : 'txt-active';
       }
     });
   }, 30000);
 }
 
-// Global functions for buttons
-window.copyText = function(text) {
-  navigator.clipboard.writeText(text).then(() => {
-    alert("Copied to clipboard!");
-  });
+// Global button click helpers
+window.copyValue = function(val) {
+  navigator.clipboard.writeText(val).then(() => alert("Copied to clipboard!"));
 };
 
-window.togglePassword = function(id, rawPassword) {
-  const el = document.getElementById(`pwd-${id}`);
+window.togglePasswordVisibility = function(keyId, realPassword) {
+  const el = document.getElementById(`pwd-${keyId}`);
   const btn = event.target;
   if (el.innerText === '••••••••') {
-    el.innerText = rawPassword;
+    el.innerText = realPassword;
     btn.innerText = 'HIDE PASSWORD';
   } else {
     el.innerText = '••••••••';
